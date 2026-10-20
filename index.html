@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>随聊 AI 私信助手</title>
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;background:#f3f5fa;color:#202638;
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif
+}
+header{
+  background:linear-gradient(135deg,#5b6cff,#8d5cff);
+  color:white;padding:28px 20px 34px;border-radius:0 0 25px 25px
+}
+header h1{margin:0 0 9px;font-size:26px}
+header p{margin:0;opacity:.9;font-size:14px}
+main{padding:18px;max-width:600px;margin:auto}
+.card{
+  background:white;border-radius:18px;padding:18px;
+  margin-bottom:16px;box-shadow:0 5px 22px #18264a0b
+}
+.title{font-size:17px;font-weight:700;margin-bottom:15px}
+.status{color:#14966b;font-size:13px}
+label{display:block;font-size:14px;margin:14px 0 8px}
+input,textarea,select{
+  width:100%;padding:12px;border:1px solid #dce1ed;
+  border-radius:11px;font-size:15px;background:white
+}
+textarea{min-height:85px;resize:vertical}
+button{
+  border:0;border-radius:12px;padding:13px 16px;
+  font-size:15px;font-weight:600;cursor:pointer
+}
+.primary{background:#5968f5;color:white;width:100%;margin-top:12px}
+.secondary{background:#eef0ff;color:#4e5ee5}
+.row{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.switch{width:48px;height:27px;accent-color:#5b68f5}
+.result{
+  background:#f5f6ff;border-radius:12px;padding:14px;
+  min-height:65px;white-space:pre-wrap;line-height:1.7
+}
+.tag{
+  display:inline-block;background:#edf0ff;color:#5363e8;
+  border-radius:8px;padding:5px 9px;font-size:12px;margin:3px
+}
+.notice{font-size:12px;line-height:1.7;color:#737b8e}
+footer{text-align:center;color:#9299a8;font-size:12px;padding:10px 20px 30px}
+</style>
+</head>
+<body>
+<header>
+  <h1>✨ 随聊 AI</h1>
+  <p>让每一次私信回复，都自然又及时。</p>
+  <p style="margin-top:18px">● 演示模式　<span style="opacity:.8">尚未连接 AI 服务</span></p>
+</header>
+
+<main>
+  <section class="card">
+    <div class="row">
+      <div class="title">🤖 自动回复设置</div>
+      <span class="status">本地演示</span>
+    </div>
+    <div class="row">
+      <span>启用自动回复</span>
+      <input id="auto" class="switch" type="checkbox">
+    </div>
+    <label>等待多久再回复？</label>
+    <select id="delay">
+      <option value="1">1 分钟</option>
+      <option value="2">2 分钟</option>
+      <option value="5">5 分钟</option>
+    </select>
+    <label>回复风格</label>
+    <select id="style">
+      <option>自然随和</option>
+      <option>礼貌专业</option>
+      <option>简洁直接</option>
+      <option>活泼幽默</option>
+    </select>
+    <p class="notice">这里的开关仅用于演示，不会监控消息或自动发送私信。</p>
+  </section>
+
+  <section class="card">
+    <div class="title">💬 回复建议生成器</div>
+    <label>对方发来的消息</label>
+    <textarea id="message" placeholder="例如：你好，你平时喜欢做什么？"></textarea>
+    <label>你希望怎么回复？</label>
+    <select id="purpose">
+      <option value="normal">普通聊天</option>
+      <option value="polite">礼貌回复</option>
+      <option value="business">咨询或合作</option>
+      <option value="later">暂时没空，稍后回复</option>
+    </select>
+    <button class="primary" onclick="generate()">生成回复建议</button>
+    <label>回复建议</label>
+    <div id="result" class="result">输入对方的消息，点击按钮生成示例。</div>
+    <button class="secondary" style="margin-top:12px" onclick="copyReply()">复制回复</button>
+  </section>
+
+  <section class="card">
+    <div class="title">🛡️ 智能回复规则</div>
+    <span class="tag">自然聊天</span>
+    <span class="tag">避免重复</span>
+    <span class="tag">敏感消息转人工</span>
+    <span class="tag">重要决定不自动处理</span>
+    <p class="notice">正式接入后，可以进一步设计消息分类、人工审核和回复记录。当前页面不会处理真实私信。</p>
+  </section>
+
+  <section class="card">
+    <div class="title">🔌 服务连接状态</div>
+    <p>网页：<span class="status">已加载演示界面</span></p>
+    <p>AI 接口：未连接</p>
+    <p>抖音私信：未连接</p>
+    <p class="notice">后续需要部署后端服务、配置安全的 AI 接口，并确认抖音官方接口的可用性。</p>
+  </section>
+</main>
+
+<footer>随聊 AI · 私信回复助手 · Demo</footer>
+
+<script>
+function generate(){
+  const msg=document.getElementById('message').value.trim();
+  const purpose=document.getElementById('purpose').value;
+  const style=document.getElementById('style').value;
+  let reply='';
+  if(!msg){
+    reply='请先输入对方发来的消息。';
+  }else if(purpose==='later'){
+    reply='不好意思，我这会儿有点事，晚点认真回复你～';
+  }else if(purpose==='polite'){
+    reply='你好呀，收到你的消息了，谢谢你！';
+  }else if(purpose==='business'){
+    reply='你好，感谢联系！方便再介绍一下具体的需求和安排吗？';
+  }else if(/你好|嗨|哈喽|在吗/.test(msg)){
+    reply='嗨，你好呀！😊 最近怎么样？';
+  }else if(/谢谢|感谢/.test(msg)){
+    reply='不客气呀，很高兴能帮到你！';
+  }else if(/忙|干嘛|做什么/.test(msg)){
+    reply='刚忙完一点事情，你呢？最近在忙什么？';
+  }else{
+    reply='哈哈，懂你的意思～你可以再跟我说说具体情况。';
+  }
+  if(style==='简洁直接') reply=reply.replace('呀','').replace('～','。');
+  if(style==='礼貌专业') reply='你好，'+reply.replace(/^嗨，|^你好呀，/,'');
+  if(style==='活泼幽默' && !reply.includes('😊')) reply+=' 😄';
+  document.getElementById('result').textContent=reply;
+}
+function copyReply(){
+  const text=document.getElementById('result').textContent;
+  if(navigator.clipboard){
+    navigator.clipboard.writeText(text).then(()=>alert('已复制回复建议！'))
+    .catch(()=>alert('请长按回复建议并手动复制。'));
+  }else{
+    alert('请长按回复建议并手动复制。');
+  }
+}
+</script>
+</body>
+</html>
